@@ -42,3 +42,20 @@ features:
     - total_payment
     - n_payment_entries
     - max_installments
+
+validation:
+  state_col: "customer_state"
+  required_cols:
+    - order_purchase_timestamp
+    - order_estimated_delivery_date
+    - customer_state
+  allowed_states: [AC, AL, AM, AP, BA, CE, DF, ES, GO, MA, MG, MS, MT, PA, PB, PE, PI, PR, RJ, RN, RO, RR, RS, SC, SE, SP, TO]
+  ranges:
+    total_price: [0, 20000]
+    total_freight: [0, 2000]
+    n_items: [1, 50]
+    n_distinct_products: [1, 50]
+    n_distinct_sellers: [1, 20]
+    total_payment: [0, 25000]
+    n_payment_entries: [1, 50]
+    max_installments: [1, 48]
