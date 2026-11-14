@@ -1,0 +1,44 @@
+model:
+  path: "models/final_model_logreg.pkl"
+  version: "logreg_v1"
+
+transformers:
+  imputer_path: "models/imputer.pkl"
+  encoder_path: "models/encoder.pkl"
+  scaler_path: "models/scaler.pkl"
+  feature_list_path: "models/feature_list.txt"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+
+logging:
+  level: "INFO"
+  log_file: "logs/service.log"
+
+features:
+  categorical_col: "customer_state"
+  numeric_cols:
+    - estimated_days
+    - n_items
+    - total_price
+    - total_freight
+    - n_distinct_products
+    - n_distinct_sellers
+    - total_payment
+    - n_payment_entries
+    - max_installments
+  base_cols:
+    - customer_state
+    - purchase_month
+    - purchase_weekday
+    - purchase_hour
+    - estimated_days
+    - n_items
+    - total_price
+    - total_freight
+    - n_distinct_products
+    - n_distinct_sellers
+    - total_payment
+    - n_payment_entries
+    - max_installments
