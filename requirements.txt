@@ -10,3 +10,9 @@ great-expectations==1.2.4
 dvc==3.58.0
 
 numpy==1.26.4
+
+# DVC Google Drive remote and compatibility pins
+dvc-gdrive==3.0.1
+pathspec==0.12.1
+protobuf==5.29.6
+google-api-core==2.24.0
