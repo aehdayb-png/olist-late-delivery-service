@@ -1,7 +1,24 @@
-﻿.venv/
+﻿# Python
+.venv/
 __pycache__/
-*.pyc
-logs/
-.env
-*.pkl
+*.py[cod]
 .pytest_cache/
+
+# Logs
+logs/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Model artifacts (managed by DVC)
+*.pkl
+
+# Local MLflow tracking data
+mlflow.db
+*.db
+*.sqlite
+*.sqlite3
+mlruns/
+mlartifacts/

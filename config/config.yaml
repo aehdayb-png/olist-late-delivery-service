@@ -1,6 +1,10 @@
 model:
+  source: "mlflow"
   path: "models/final_model_logreg.pkl"
   version: "logreg_v1"
+  registry_name: "OlistLateDelivery"
+  registry_alias: "champion"
+  fallback_to_local: false
 
 transformers:
   imputer_path: "models/imputer.pkl"

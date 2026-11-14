@@ -1,9 +1,12 @@
-﻿import time
+import os
+import time
 
 import joblib
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 
-from src.config_loader import load_config, resolve_path
+from src.config_loader import PROJECT_ROOT, load_config, resolve_path
 from src.features import build_features
 from src.logger import get_logger
 from src.preprocessing import Preprocessor
@@ -15,28 +18,76 @@ class Predictor:
 
     def __init__(self):
         cfg = load_config()
+        model_cfg = cfg["model"]
 
-        self.model = joblib.load(resolve_path(cfg["model"]["path"]))
-        self.model_version = cfg["model"]["version"]
-        self.preprocessor = Preprocessor()
         self.logger = get_logger()
+        self.model_version = model_cfg["version"]
+        self.model_source = model_cfg.get("source", "local")
+
+        if self.model_source == "mlflow":
+            tracking_uri = os.getenv(
+                "MLFLOW_TRACKING_URI",
+                f"sqlite:///{(PROJECT_ROOT / 'mlflow.db').as_posix()}",
+            )
+
+            registry_uri = os.getenv("MLFLOW_REGISTRY_URI", tracking_uri)
+
+            mlflow.set_tracking_uri(tracking_uri)
+            mlflow.set_registry_uri(registry_uri)
+
+            model_name = model_cfg["registry_name"]
+            model_alias = model_cfg["registry_alias"]
+            model_uri = f"models:/{model_name}@{model_alias}"
+
+            try:
+                self.model = mlflow.sklearn.load_model(model_uri)
+                self.logger.info(
+                    "Model loaded from MLflow | model_uri=%s",
+                    model_uri,
+                )
+
+            except Exception as exc:
+                if not model_cfg.get("fallback_to_local", False):
+                    raise RuntimeError(
+                        f"Could not load model from MLflow: {model_uri}"
+                    ) from exc
+
+                self.logger.warning(
+                    "MLflow model loading failed; using local fallback | "
+                    "model_uri=%s | error_type=%s",
+                    model_uri,
+                    type(exc).__name__,
+                )
+
+                self.model = joblib.load(
+                    resolve_path(model_cfg["path"])
+                )
+                self.model_source = "local_fallback"
+
+        elif self.model_source == "local":
+            self.model = joblib.load(resolve_path(model_cfg["path"]))
+
+        else:
+            raise ValueError(
+                f"Unsupported model source: {self.model_source}"
+            )
+
+        self.preprocessor = Preprocessor()
 
         if 1 not in self.model.classes_:
-            raise ValueError("Model does not contain the late-delivery class (1).")
+            raise ValueError(
+                "Model does not contain the late-delivery class (1)."
+            )
 
         self.logger.info(
-            "Predictor initialized | model_version=%s",
+            "Predictor initialized | model_version=%s | model_source=%s",
             self.model_version,
+            self.model_source,
         )
 
     def predict(self, orders: pd.DataFrame) -> pd.DataFrame:
         start_time = time.perf_counter()
-
-        input_payload = (
-            orders.to_dict(orient="records")
-            if isinstance(orders, pd.DataFrame)
-            else repr(orders)
-        )
+        order_count = len(orders) if isinstance(orders, pd.DataFrame) else None
 
         try:
             if not isinstance(orders, pd.DataFrame):
@@ -56,7 +107,9 @@ class Predictor:
             processed = self.preprocessor.transform(features)
 
             late_class_index = list(self.model.classes_).index(1)
-            probabilities = self.model.predict_proba(processed)[:, late_class_index]
+            probabilities = self.model.predict_proba(processed)[
+                :, late_class_index
+            ]
             predictions = self.model.predict(processed)
 
             results = validated.copy()
@@ -68,11 +121,14 @@ class Predictor:
 
             self.logger.info(
                 "prediction_request_success | model_version=%s | "
-                "latency_ms=%.2f | input=%s | output=%s",
+                "model_source=%s | order_count=%s | latency_ms=%.2f | "
+                "predicted_late_count=%s | mean_late_probability=%.4f",
                 self.model_version,
+                self.model_source,
+                order_count,
                 latency_ms,
-                input_payload,
-                results.to_dict(orient="records"),
+                int((predictions == 1).sum()),
+                float(probabilities.mean()),
             )
 
             return results
@@ -80,12 +136,15 @@ class Predictor:
         except Exception as exc:
             latency_ms = (time.perf_counter() - start_time) * 1000
 
-            self.logger.exception(
+            self.logger.error(
                 "prediction_request_failed | model_version=%s | "
-                "latency_ms=%.2f | input=%s | error=%s",
+                "model_source=%s | order_count=%s | latency_ms=%.2f | "
+                "error_type=%s | error=%s",
                 self.model_version,
+                self.model_source,
+                order_count,
                 latency_ms,
-                input_payload,
+                type(exc).__name__,
                 str(exc),
             )
 

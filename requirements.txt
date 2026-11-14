@@ -16,3 +16,7 @@ dvc-gdrive==3.0.1
 pathspec==0.12.1
 protobuf==5.29.6
 google-api-core==2.24.0
+
+SQLAlchemy==2.0.36
+
+boto3==1.35.54
