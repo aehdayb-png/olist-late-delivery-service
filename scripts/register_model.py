@@ -38,9 +38,7 @@ def main():
         registry_uri=REGISTRY_URI,
     )
 
-    existing_versions = client.search_model_versions(
-        f"name='{MODEL_NAME}'"
-    )
+    existing_versions = client.search_model_versions(f"name='{MODEL_NAME}'")
 
     for version in existing_versions:
         run = client.get_run(version.run_id)
@@ -71,20 +69,24 @@ def main():
     signature = infer_signature(input_example, output_example)
 
     with mlflow.start_run(run_name="logistic-regression-baseline") as run:
-        mlflow.log_params({
-            "model_type": type(model).__name__,
-            "class_weight": "balanced",
-            "max_iter": 1000,
-            "random_state": 42,
-            "sklearn_version": sklearn.__version__,
-            "feature_count": len(model.feature_names_in_),
-            "model_sha256": model_hash,
-        })
+        mlflow.log_params(
+            {
+                "model_type": type(model).__name__,
+                "class_weight": "balanced",
+                "max_iter": 1000,
+                "random_state": 42,
+                "sklearn_version": sklearn.__version__,
+                "feature_count": len(model.feature_names_in_),
+                "model_sha256": model_hash,
+            }
+        )
 
-        mlflow.log_metrics({
-            "validation_roc_auc": 0.6931595894863017,
-            "test_roc_auc": 0.7088474411566943,
-        })
+        mlflow.log_metrics(
+            {
+                "validation_roc_auc": 0.6931595894863017,
+                "test_roc_auc": 0.7088474411566943,
+            }
+        )
 
         model_info = mlflow.sklearn.log_model(
             sk_model=model,
@@ -94,23 +96,15 @@ def main():
             registered_model_name=MODEL_NAME,
         )
 
-        versions = client.search_model_versions(
-            f"name='{MODEL_NAME}'"
-        )
+        versions = client.search_model_versions(f"name='{MODEL_NAME}'")
 
         registered_version = next(
-            (
-                version
-                for version in versions
-                if version.run_id == run.info.run_id
-            ),
+            (version for version in versions if version.run_id == run.info.run_id),
             None,
         )
 
         if registered_version is None:
-            raise RuntimeError(
-                "Could not find the registered model version."
-            )
+            raise RuntimeError("Could not find the registered model version.")
 
         client.set_registered_model_alias(
             MODEL_NAME,

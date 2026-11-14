@@ -92,9 +92,7 @@ def predict_batch(orders: list[OrderRequest]):
         )
 
     try:
-        input_df = pd.DataFrame(
-            [order.model_dump() for order in orders]
-        )
+        input_df = pd.DataFrame([order.model_dump() for order in orders])
         results = predictor.predict(input_df)
 
         predictions = [

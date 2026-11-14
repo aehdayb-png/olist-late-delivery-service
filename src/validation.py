@@ -59,7 +59,9 @@ def validate_orders(df: pd.DataFrame):
     for r in result.results:
         if not r.success:
             kwargs = r.expectation_config.kwargs
-            errors.append(f"{r.expectation_config.type} failed on '{kwargs.get('column')}'")
+            errors.append(
+                f"{r.expectation_config.type} failed on '{kwargs.get('column')}'"
+            )
 
     purchased = pd.to_datetime(df["order_purchase_timestamp"], errors="coerce")
     estimated = pd.to_datetime(df["order_estimated_delivery_date"], errors="coerce")

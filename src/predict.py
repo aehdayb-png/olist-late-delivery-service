@@ -59,25 +59,19 @@ class Predictor:
                     type(exc).__name__,
                 )
 
-                self.model = joblib.load(
-                    resolve_path(model_cfg["path"])
-                )
+                self.model = joblib.load(resolve_path(model_cfg["path"]))
                 self.model_source = "local_fallback"
 
         elif self.model_source == "local":
             self.model = joblib.load(resolve_path(model_cfg["path"]))
 
         else:
-            raise ValueError(
-                f"Unsupported model source: {self.model_source}"
-            )
+            raise ValueError(f"Unsupported model source: {self.model_source}")
 
         self.preprocessor = Preprocessor()
 
         if 1 not in self.model.classes_:
-            raise ValueError(
-                "Model does not contain the late-delivery class (1)."
-            )
+            raise ValueError("Model does not contain the late-delivery class (1).")
 
         self.logger.info(
             "Predictor initialized | model_version=%s | model_source=%s",
@@ -99,17 +93,13 @@ class Predictor:
             validated, report = validate_orders(orders)
 
             if not report["valid"]:
-                raise ValueError(
-                    "Invalid order input: " + "; ".join(report["errors"])
-                )
+                raise ValueError("Invalid order input: " + "; ".join(report["errors"]))
 
             features = build_features(validated)
             processed = self.preprocessor.transform(features)
 
             late_class_index = list(self.model.classes_).index(1)
-            probabilities = self.model.predict_proba(processed)[
-                :, late_class_index
-            ]
+            probabilities = self.model.predict_proba(processed)[:, late_class_index]
             predictions = self.model.predict(processed)
 
             results = validated.copy()
