@@ -1,4 +1,4 @@
-services:
+﻿services:
   postgres:
     image: postgres:16
     environment:
@@ -95,7 +95,7 @@ services:
       - --port
       - "5000"
       - --backend-store-uri
-      - postgresql+psycopg2://${POSTGRES_USER}:${MINIO_ROOT_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - --default-artifact-root
       - s3://mlflow/
     ports:
