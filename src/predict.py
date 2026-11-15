@@ -9,6 +9,7 @@ import pandas as pd
 from src.config_loader import PROJECT_ROOT, load_config, resolve_path
 from src.features import build_features
 from src.logger import get_logger
+from src.monitoring import log_predictions
 from src.preprocessing import Preprocessor
 from src.validation import validate_orders
 
@@ -106,6 +107,13 @@ class Predictor:
             results["late_probability"] = probabilities
             results["late_risk_percent"] = (probabilities * 100).round(2)
             results["predicted_is_late"] = predictions
+
+            log_predictions(
+                features,
+                results,
+                self.model_version,
+                resolve_path("logs/predictions.jsonl"),
+            )
 
             latency_ms = (time.perf_counter() - start_time) * 1000
 
