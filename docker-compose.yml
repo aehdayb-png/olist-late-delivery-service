@@ -1,4 +1,4 @@
-﻿services:
+services:
   postgres:
     image: postgres:16
     environment:
@@ -149,6 +149,8 @@
       AWS_DEFAULT_REGION: us-east-1
     ports:
       - "8000:8000"
+    volumes:
+      - api_logs:/app/logs
     depends_on:
       register-model:
         condition: service_completed_successfully
@@ -166,3 +168,4 @@
 volumes:
   postgres_data:
   rustfs_data:
+  api_logs:

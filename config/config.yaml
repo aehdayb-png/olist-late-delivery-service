@@ -63,3 +63,6 @@ validation:
     total_payment: [0, 25000]
     n_payment_entries: [1, 50]
     max_installments: [1, 48]
+
+monitoring:
+  prediction_log: "logs/predictions.jsonl"

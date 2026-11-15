@@ -20,6 +20,7 @@ class Predictor:
     def __init__(self):
         cfg = load_config()
         model_cfg = cfg["model"]
+        self.prediction_log = cfg["monitoring"]["prediction_log"]
 
         self.logger = get_logger()
         self.model_version = model_cfg["version"]
@@ -112,7 +113,7 @@ class Predictor:
                 features,
                 results,
                 self.model_version,
-                resolve_path("logs/predictions.jsonl"),
+                resolve_path(self.prediction_log),
             )
 
             latency_ms = (time.perf_counter() - start_time) * 1000
