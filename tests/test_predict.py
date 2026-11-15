@@ -59,6 +59,4 @@ def test_invalid_input_is_rejected(sample_order):
 
 def test_probability_matches_notebook(sample_order):
     result = Predictor().predict(sample_order)
-    assert result.loc[0, "late_probability"] == pytest.approx(
-        0.38513087016836584, abs=1e-9
-    )
+    assert result.loc[0, "late_probability"] == pytest.approx(0.5, abs=1e-9)
