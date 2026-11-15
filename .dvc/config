@@ -3,3 +3,5 @@
 ['remote "myremote"']
     url = gdrive://1C-n7lKjANap5OD9EztqxZ6xdijtExmEs
     gdrive_acknowledge_abuse = true
+['remote "ci-remote"']
+    url = ../dvc-store
