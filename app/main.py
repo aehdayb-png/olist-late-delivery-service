@@ -1,8 +1,10 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 
+from app.metrics import metrics_middleware
+from app.metrics import router as metrics_router
 from app.schemas import (
     BatchPredictionResponse,
     HealthResponse,
@@ -27,6 +29,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+app.middleware("http")(metrics_middleware)
+app.include_router(metrics_router)
 
 
 def get_predictor() -> Predictor:
