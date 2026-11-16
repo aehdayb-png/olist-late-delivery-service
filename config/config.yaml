@@ -1,5 +1,5 @@
 model:
-  source: "mlflow"
+  source: "local"
   path: "models/final_model_logreg.pkl"
   version: "logreg_v1"
   registry_name: "OlistLateDelivery"
