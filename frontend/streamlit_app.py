@@ -4,7 +4,7 @@ from datetime import date, datetime, time, timedelta
 import requests
 import streamlit as st
 
-API_URL = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
+API_URL = os.getenv("API_URL", "https://olist-delayradar.onrender.com").rstrip("/")
 
 st.set_page_config(
     page_title="Olist Delivery Checker",
