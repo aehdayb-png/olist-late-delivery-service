@@ -2,8 +2,6 @@ import os
 import time
 
 import joblib
-import mlflow
-import mlflow.sklearn
 import pandas as pd
 
 from src.config_loader import PROJECT_ROOT, load_config, resolve_path
@@ -27,6 +25,9 @@ class Predictor:
         self.model_source = model_cfg.get("source", "local")
 
         if self.model_source == "mlflow":
+            import mlflow
+            import mlflow.sklearn
+
             tracking_uri = os.getenv(
                 "MLFLOW_TRACKING_URI",
                 f"sqlite:///{(PROJECT_ROOT / 'mlflow.db').as_posix()}",
